@@ -1,0 +1,13 @@
+Professor: Carlos Cuevas
+Source: Rate My Professors
+URL: https://www.ratemyprofessors.com/professor/2974235
+Quality: 3.0
+Difficulty: 3.0
+Course: CISC3810
+Apr 7th, 2026
+For Credit: Yes
+Attendance: Mandatory
+Grade: Not sure yet
+Textbook: Yes
+
+Clearly knows his stuff from real industry experience, but it doesn't translate to teaching — rushes through slides and is consistently late. Study what he tells you to focus on independently, and you'll build solid, interview-ready SQL skills. Kind person, generous grader. Exams are 60% of your grade.
