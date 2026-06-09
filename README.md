@@ -105,7 +105,6 @@ Sources: cuevas_rmp2.txt, coursicle_levitan.txt, samanta_rmp.txt, auguste_rmp.tx
 
 Sources: cuevas_rmp2.txt, auguste_rmp.txt, cuevas_rmp.txt, samanta_rmp.txt, gross_rmp.txt
 
-
 **Response 3: Out-of-scope query showing refusal**
 
 **Query:** "What is the best restaurant near Brooklyn College?"
@@ -156,7 +155,7 @@ Sources: cuevas_rmp2.txt, coursicle_levitan.txt, samanta_rmp.txt, auguste_rmp.tx
 
 **What the system returned:** "There is no information about Professor Levitan in the provided context."
 
-**Root cause (tied to a specific pipeline stage):** The failure occurred at the **retrieval/embedding** stage.The query "Professor Levitan" without "Rivka" failed to match because the name "Rivka Levitan" appears in the document header/metadata, but the substantive review content uses pronouns ("she," "her," "ive"). The embedding model (all-MiniLM-L6-v2) did not create a strong semantic association between "Levitan" and the teaching style descriptions because the name and the review content were separated by chunk boundaries and metadata lines. 
+**Root cause (tied to a specific pipeline stage):** The failure occurred at the **retrieval/embedding** stage. The query "Professor Levitan" without "Rivka" failed to match because the name "Rivka Levitan" appears in the document header/metadata, but the substantive review content uses pronouns ("she," "her," "ive"). The embedding model (all-MiniLM-L6-v2) did not create a strong semantic association between "Levitan" and the teaching style descriptions because the name and the review content were separated by chunk boundaries and metadata lines. 
 
 The chunking strategy split the document such that the header (with the full name) and the review body (with the content) became separate chunks, and the embedding for the content chunks did not encode the professor's name. When the query was changed to "Professor Rivka Levitan," the system succeeded because the full name appeared in the header chunk, which was then retrieved.
 
@@ -189,5 +188,27 @@ The chunking strategy split the document such that the header (with the full nam
 - **What it produced:** Kimi suggested three alternatives: `llama-3.1-8b-instant`, `llama-3.3-70b-versatile`, and `gemma2-9b-it`. It provided updated code with the new model name.
 
 - **What I changed/overrode:** I selected `llama-3.1-8b-instant` instead of `llama-3.3-70b-versatile` because the larger model was unnecessary for short professor review answers and would increase token costs. I also kept the temperature at 0.3 (rather than Kimi's suggested 0.7) because grounded generation requires less creativity and more factual adherence.
+
+**Instance 3: Implementing hybrid search for the stretch challenge**
+
+- **What I gave the AI:** I described the failure case from my evaluation (Q2: "Professor Levitan" without "Rivka" returned no results) and asked Kimi how to combine semantic search with keyword/BM25 search to fix exact-name matching.
+
+- **What it produced:** Kimi suggested the `rank-bm25` library and provided a `HybridSearcher` class that computes both semantic similarity (cosine distance via embeddings) and BM25 keyword scores, then combines them with weighted averaging.
+
+- **What I changed/overrode:** I set `alpha=0.5` (equal weight to semantic and BM25) after testing. I also added a custom tokenizer that handles punctuation and lowercase normalization for better keyword matching. I simplified the score normalization because Kimi's initial version used complex min-max scaling that caused division-by-zero errors when all BM25 scores were zero.
+
+---
+
+## (Stretch Challenge): Hybrid Search
+
+I combined semantic search with BM25 keyword search to improve retrieval for exact-name queries.
+
+**Problem:** Pure semantic search failed when users asked about "Professor Levitan" without "Rivka" — the embedding model didn't associate the surname with the review content.
+
+**Solution:** `HybridSearcher` class computes both semantic similarity (cosine distance via embeddings) and BM25 keyword scores, then combines them with weighted averaging (alpha=0.5).
+
+**Impact:** The failure case from the evaluation (Q2) is now resolved. The same query returns the correct document and a detailed, cited answer.
+
+**Code:** `hybrid_search.py`
 
 ---

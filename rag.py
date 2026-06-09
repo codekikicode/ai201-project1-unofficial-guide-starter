@@ -1,8 +1,9 @@
 import os
 import groq
 from dotenv import load_dotenv
-from embed import get_embedding_model, query_vector_store
+from embed import get_embedding_model
 from chromadb import PersistentClient
+from hybrid_search import HybridSearcher
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,7 +17,6 @@ def get_groq_client():
 
 def generate_answer(query, retrieved_chunks, client):
     """Generate a grounded answer using retrieved context."""
-    # Build context from retrieved chunks
     context_parts = []
     sources = []
     for i, chunk in enumerate(retrieved_chunks["documents"][0]):
@@ -26,7 +26,6 @@ def generate_answer(query, retrieved_chunks, client):
     
     context = "\n\n".join(context_parts)
     
-    # Create prompt
     prompt = f"""You are a helpful assistant for Brooklyn College students. Answer the question using ONLY the provided context. Do not use outside knowledge. Always cite which document(s) your answer comes from.
 
 Context:
@@ -36,7 +35,6 @@ Question: {query}
 
 Answer:"""
 
-    # Generate response
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",  
         messages=[
@@ -48,19 +46,20 @@ Answer:"""
     )
     
     answer = response.choices[0].message.content
-    return answer, list(set(sources))  # Remove duplicate sources
+    return answer, list(set(sources))
 
 def main():
-    # Initialize
+    # Initialize 
     client = get_groq_client()
     model = get_embedding_model()
     
-    # Connect to existing vector store
     chroma_client = PersistentClient(path="./chroma_db")
     collection = chroma_client.get_collection("professor_reviews")
     
-    # Interactive query loop
-    print("Brooklyn College CISC Department Review RAG System")
+    # Create searcher
+    searcher = HybridSearcher(collection, model, alpha=0.5)
+    
+    print("Brooklyn College CISC Department RAG System (Hybrid Search)")
     print("Type 'quit' to exit")
     print("-" * 50)
     
@@ -72,10 +71,8 @@ def main():
         if not query:
             continue
         
-        # Retrieve relevant chunks
-        results = query_vector_store(query, collection, model, n_results=5)
-        
-        # Generate answer
+        # Search and generate
+        results = searcher.search(query, n_results=5)
         answer, sources = generate_answer(query, results, client)
         
         print(f"\n{'='*50}")

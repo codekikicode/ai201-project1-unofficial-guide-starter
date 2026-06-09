@@ -74,21 +74,30 @@ If chunks were too small (200 chars), reviews would get fragmented and lose mean
 
 ## Architecture
 
-┌─────────────────┐     ┌─────────────┐     ┌─────────────────────────┐
-│  10 .txt files  │────▶│  26 chunks │────▶│  all-MiniLM-L6-v2       │
-│  in documents/  │     │  500 chars  │     │  sentence-transformers  │
-│                 │     │  100 overlap│     │                         │
-└─────────────────┘     └─────────────┘     └─────────────────────────┘
-Ingestion                Chunking              Embedding
-(ingest.py)             (chunk.py)            (embed.py)
-┌─────────────────────────┐       ┌─────────────────────────┐
-│      ChromaDB           │────▶ │  Groq LLM               │
-│   vector database       │       │  llama-3.1-8b-instant   │
-│   cosine similarity     │       │  grounded generation    │
-│   top-5 retrieval       │       │  with source citation   │
-└─────────────────────────┘       └─────────────────────────┘
-Retrieval                    Generation
-(embed.py)                   (rag.py)
+┌─────────────────┐        ┌─────────────┐       ┌─────────────────────────┐
+│  10 .txt files  │────▶  │  26 chunks   │────▶ │  all-MiniLM-L6-v2       │
+│  in documents/  │        │  500 chars  │       │  sentence-transformers  │
+│                 │        │ 100 overlap │       │                         │
+└─────────────────┘        └─────────────┘       └─────────────────────────┘
+Ingestion                  Chunking               Embedding
+(ingest.py)                (chunk.py)             (embed.py)
+┌─────────────────────────┐      ┌─────────────────────────┐
+│      ChromaDB           │────▶│   BM25 + Semantic       │
+│   vector database       │      │   Hybrid Search        │
+│   cosine similarity     │      │   rank-bm25 library    │
+│   top-5 retrieval       │      │   alpha=0.5 combined   │
+└─────────────────────────┘      └────────────────────────┘
+Retrieval                        Re-ranking
+(embed.py)                       (hybrid_search.py)
+┌─────────────────────────┐
+│    Groq LLM             │
+│  llama-3.1-8b-instant   │
+│   grounded generation   │
+│   with source citation  │
+└─────────────────────────┘
+Generation
+(rag.py)
+
 ---
 
 ## AI Tool Plan
@@ -96,7 +105,31 @@ Retrieval                    Generation
 I used AI (v. 2.6 Kimi) to help implement the chunking strategy and retrieval pipeline. I provided my chunking strategy section and asked for a Python implementation of the chunk_text() function with sentence-boundary awareness. I also used the chat to debug the Groq API integration when the model was decommissioned, and to structure the Streamlit interface.
 
 **Milestone 3 — Ingestion and chunking:**
+- I gave Kimi my chunking strategy parameters (500 characters, 100 overlap, sentence-boundary awareness, short review documents) and asked for a Python implementation.
+- Kimi returned a basic character-splitting function. I revised it to add sentence-boundary detection (searching the last 50 characters for periods/newlines) and a minimum-content threshold to prevent tiny fragments.
+- I also used Kimi to debug file loading issues when `mkdir documents` failed because the directory already existed.
 
 **Milestone 4 — Embedding and retrieval:**
+- I asked Kimi to implement the ChromaDB vector store setup and embedding pipeline using `sentence-transformers` and `all-MiniLM-L6-v2`.
+- Kimi provided the initial code, but I had to add `load_dotenv()` to fix the Groq API key loading issue that caused a `ValueError` on startup.
+- For the stretch challenge, I asked Kimi to help implement BM25 hybrid search. Kimi suggested the `rank-bm25` library and provided the scoring combination logic. I adjusted the alpha weighting (0.5) after testing.
 
 **Milestone 5 — Generation and interface:**
+- I used Kimi to structure the Streamlit interface (`app.py`) after the CLI version was working.
+- Kimi also helped debug the Groq model decommissioning error (`llama3-8b-8192` → `llama-3.1-8b-instant`) and suggested the system prompt design for grounded generation with source citation.
+
+---
+
+## Stretch Challenge: Hybrid Search
+
+I implemented hybrid search combining semantic search (all-MiniLM-L6-v2 embeddings) with BM25 keyword search to address the failure case where "Professor Levitan" without "Rivka" returned no results.
+
+**Why hybrid search:** The failure occurred because the embedding model didn't associate "Levitan" with the review content (the name was in the header, but reviews used "she/her"). BM25 keyword search finds exact word matches regardless of semantic context.
+
+**Implementation:** I added `rank-bm25` library, tokenized documents and queries, and combined scores with alpha=0.5 (equal weight to semantic and BM25).
+
+**Result:** The same query ("What do students say about Professor Levitan?") now correctly retrieves `coursicle_levitan.txt` and generates a detailed, cited answer.
+
+**Tradeoff:** Hybrid search adds latency (BM25 index building) and complexity, but significantly improves recall for name-based queries.
+
+---
