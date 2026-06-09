@@ -136,6 +136,9 @@ Sources: cuevas_rmp2.txt, coursicle_levitan.txt, samanta_rmp.txt, auguste_rmp.tx
 
 ## Evaluation Report
 
+**Retrieval quality:** Relevant / Partially relevant / Off-target  
+**Response accuracy:** Accurate / Partially accurate / Inaccurate
+
 | # | Question | Expected answer | System response (summarized) | Retrieval quality | Response accuracy |
 |---|----------|-----------------|------------------------------|-------------------|-------------------|
 | 1 | "Which professor teaches CISC 3130 -- Data Structures?" | "Professor Rivka Levitan teaches CISC 3130 -- Data Structures" | Correctly identified Levitan, cited `coursicle_levitan.txt` with positive review quote. | **Relevant** — Top result was the correct document with course listing. | **Accurate**  |
@@ -143,9 +146,6 @@ Sources: cuevas_rmp2.txt, coursicle_levitan.txt, samanta_rmp.txt, auguste_rmp.tx
 | 3 | "What do students say about Professor Zhou's teaching style?" |  "Students say Professor Zhou is a nice person but his lectures can be boring. They advise not relying on lectures and studying outside of class. He can be a tough grader on exams but may boost final grades. He is accessible during office hours." | Retrieved boring lectures and independent study advice from `zhou_rmp.txt`. | **Relevant** — Correct document was top result. | **Partially accurate** — Captured main points but missed tough grader and office hours details. |
 | 4 | "What complaints do students have about the Brooklyn College program facilities?" | "Students complain about roaches, dirty walls, broken chalkboards, holes in walls, non-working clocks, and overcrowded classrooms with more students than chairs. There was a protest after a ceiling caved in." | Comprehensive structured list of 7 complaints, all from `reddit_cs_program_facilities.txt`. | **Relevant** — Correct document retrieved and fully utilized. | **Accurate** |
 | 5 | "What do students say about Professor Gross?" | "What do students say about Professor Gross?" | "Students describe him as the worst professor in 6 years, with no Brightspace, no lectures or grades posted, exams graded his way or no credit, waste-of-time lectures, an ego, and yelling at students. He didn't curve and students got D+ grades despite getting B or above in other CS classes." | "Worst professor" claim, no Brightspace, no lectures/grades, yelling, no curve from `gross_rmp.txt`. | **Relevant** — Correct document in retrieved set | **Partially accurate** — Core complaints captured, minor details (ego, waste-of-time) omitted. |
-
-**Retrieval quality:** Relevant / Partially relevant / Off-target  
-**Response accuracy:** Accurate / Partially accurate / Inaccurate
 
 ---
 
