@@ -12,14 +12,14 @@ The domain I chose was Brooklyn College Computer Science Professor Reviews. This
 
 | # | Source | Description | URL or location |
 |---|--------|-------------|-----------------|
-| 1 | Rate My Professors |  Professor Amara Auguste (CISC 1115)| https://www.ratemyprofessors.com/professor/2950851 |
+| 1 | Rate My Professors | Professor Amara Auguste (CISC 1115)| https://www.ratemyprofessors.com/professor/2950851 |
 | 2 | Rate My Professors | Professor Carlos Cuevas, review 1 (CISC 3810) | https://www.ratemyprofessors.com/professor/2974235 |
 | 3 | Rate My Professors | Professor Carlos Cuevas, review 2 (CISC 3810) | https://www.ratemyprofessors.com/professor/2974235 |
 | 4 | Rate My Professors | Professor Murray Gross (CISC 3140) | https://www.ratemyprofessors.com/professor/167158 |
 | 5 | Rate My Professors | Professor Priyanka Samanta, review 1 (CISC 1050) | https://www.ratemyprofessors.com/professor/2757901 |
 | 6 | Rate My Professors | Professor Priyanka Samanta, review 2 (CISC 3140) | https://www.ratemyprofessors.com/professor/2757901 |
 | 7 | Rate My Professors | Professor Neng-Fa Zhou (CISC 3160) | https://www.ratemyprofessors.com/professor/176933 |
-| 8 | Coursicle | Professor Rivka Levitan (CISC 3130, CISC 3320) | |
+| 8 | Coursicle | Professor Rivka Levitan (CISC 3130, CISC 3320) | https://www.coursicle.com/brooklyncuny/?professor=Rivka+Levitan&type=reviews |
 | 9 | Reddit| r/BrooklynCollege "How is the CS program?" | https://www.reddit.com/r/BrooklynCollege/comments/kgppkf/how_is_the_cs_program/ |
 | 10 |Reddit | r/BrooklynCollege CS program facilities comment | https://www.reddit.com/r/BrooklynCollege/comments/kgppkf/how_is_the_cs_program/ |
 
@@ -49,10 +49,9 @@ If chunks were too small (200 chars), reviews would get fragmented and lose mean
 
 ## Evaluation Plan
 
-
 | # | Question | Expected answer |
 |---|----------|-----------------|
-| 1 | "Which professor teaches CISC 3130 -- Data Structures?" | "Profeessor Rivka Levitan teaches CISC 3130 -- Data Structures" |
+| 1 | "Which professor teaches CISC 3130 -- Data Structures?" | "Professor Rivka Levitan teaches CISC 3130 -- Data Structures" |
 | 2 | "What do students say about Professor Levitan's teaching style?" | "Students say she is knowledgeable, has a nice voice, explains things clearly, and her class is stress-free." |
 | 3 | "What do students say about Professor Zhou's teaching style?" | "Students say Professor Zhou is a nice person but his lectures can be boring. They advise not relying on lectures and studying outside of class. He can be a tough grader on exams but may boost final grades. He is accessible during office hours." |
 | 4 | "What complaints do students have about the Brooklyn College program facilities?" | "Students complain about roaches, dirty walls, broken chalkboards, holes in walls, non-working clocks, and overcrowded classrooms with more students than chairs. There was a protest after a ceiling caved in." |

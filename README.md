@@ -39,6 +39,18 @@ The domain I chose was Brooklyn College Computer Science Professor Reviews. This
 
 ---
 
+## Sample Chunks
+
+| Chunk ID | Source Document | Text Preview |
+|----------|-----------------|--------------|
+| auguste_rmp.txt_chunk_0 | auguste_rmp.txt | Professor: Amara Auguste... Java is hard, but she makes it as easy as possible... |
+| auguste_rmp.txt_chunk_1 | auguste_rmp.txt | odelab for easy points. She has her own website... |
+| coursicle_levitan.txt_chunk_0 | coursicle_levitan.txt | Professor Rivka Levitan... CISC 3130 - Data Structures... |
+| coursicle_levitan.txt_chunk_1 | coursicle_levitan.txt | stress free while also being very knowledgable... |
+| coursicle_levitan.txt_chunk_2 | coursicle_levitan.txt | ctures. We had two exams and final... |
+
+---
+
 ## Embedding Model
 
 **Model used:** all-MiniLM-L6-v2 via sentence-transformers. This model is lightweight (80MB), fast, and works well for semantic similarity on short English text.
@@ -142,10 +154,10 @@ Sources: cuevas_rmp2.txt, coursicle_levitan.txt, samanta_rmp.txt, auguste_rmp.tx
 | # | Question | Expected answer | System response (summarized) | Retrieval quality | Response accuracy |
 |---|----------|-----------------|------------------------------|-------------------|-------------------|
 | 1 | "Which professor teaches CISC 3130 -- Data Structures?" | "Professor Rivka Levitan teaches CISC 3130 -- Data Structures" | Correctly identified Levitan, cited `coursicle_levitan.txt` with positive review quote. | **Relevant** — Top result was the correct document with course listing. | **Accurate**  |
-| 2 | "What do students say about Professor Levitan's teaching style?"| "Students say she is knowledgeable, has a nice voice, explains things clearly, and her class is stress-free." | "There is no information about Professor Levitan in the provided context." | **Off-Target** — Retrieved unrelated documents (Zhou, Auguste, Cuevas, Samanta, Gross). Missed Levitan entirely. | **Inaccurate** — Failure case: name-only query didn't match. |
-| 3 | "What do students say about Professor Zhou's teaching style?" |  "Students say Professor Zhou is a nice person but his lectures can be boring. They advise not relying on lectures and studying outside of class. He can be a tough grader on exams but may boost final grades. He is accessible during office hours." | Retrieved boring lectures and independent study advice from `zhou_rmp.txt`. | **Relevant** — Correct document was top result. | **Partially accurate** — Captured main points but missed tough grader and office hours details. |
-| 4 | "What complaints do students have about the Brooklyn College program facilities?" | "Students complain about roaches, dirty walls, broken chalkboards, holes in walls, non-working clocks, and overcrowded classrooms with more students than chairs. There was a protest after a ceiling caved in." | Comprehensive structured list of 7 complaints, all from `reddit_cs_program_facilities.txt`. | **Relevant** — Correct document retrieved and fully utilized. | **Accurate** |
-| 5 | "What do students say about Professor Gross?" | "What do students say about Professor Gross?" | "Students describe him as the worst professor in 6 years, with no Brightspace, no lectures or grades posted, exams graded his way or no credit, waste-of-time lectures, an ego, and yelling at students. He didn't curve and students got D+ grades despite getting B or above in other CS classes." | "Worst professor" claim, no Brightspace, no lectures/grades, yelling, no curve from `gross_rmp.txt`. | **Relevant** — Correct document in retrieved set | **Partially accurate** — Core complaints captured, minor details (ego, waste-of-time) omitted. |
+| 2 | "What do students say about Professor Levitan's teaching style?"| "Students say she is knowledgeable, has a nice voice, explains things clearly, and her class is stress-free." | System returned: "There is no information about Professor Levitan in the provided context." | **Off-Target** — Retrieved unrelated documents (Zhou, Auguste, Cuevas, Samanta, Gross). Missed Levitan entirely. | **Inaccurate** — Failure case: name-only query didn't match. |
+| 3 | "What do students say about Professor Zhou's teaching style?" |  "Students say Professor Zhou is a nice person but his lectures can be boring. They advise not relying on lectures and studying outside of class. He can be a tough grader on exams but may boost final grades. He is accessible during office hours." | System returned reviews discussing boring lectures and independent study advice from `zhou_rmp.txt`. | **Relevant** — Correct document was top result. | **Partially accurate** — Captured main points but missed tough grader and office hours details. |
+| 4 | "What complaints do students have about the Brooklyn College program facilities?" | "Students complain about roaches, dirty walls, broken chalkboards, holes in walls, non-working clocks, and overcrowded classrooms with more students than chairs. There was a protest after a ceiling caved in." | System returned comprehensive structured list of 7 complaints, all from `reddit_cs_program_facilities.txt`. | **Relevant** — Correct document retrieved and fully utilized. | **Accurate** |
+| 5 | "What do students say about Professor Gross?" | "Students describe him as the worst professor in 6 years, with no Brightspace, no lectures or grades posted, exams graded his way or no credit, waste-of-time lectures, an ego, and yelling at students. He didn't curve and students got D+ grades despite getting B or above in other CS classes." | System returned "Worst professor" review claim, no Brightspace usage claim, no lectures/grades claim, yelling, no curve from `gross_rmp.txt`. | **Relevant** — Correct document in retrieved set | **Partially accurate** — Core complaints captured, minor details (ego, waste-of-time) omitted. |
 
 ---
 
@@ -160,6 +172,33 @@ Sources: cuevas_rmp2.txt, coursicle_levitan.txt, samanta_rmp.txt, auguste_rmp.tx
 The chunking strategy split the document such that the header (with the full name) and the review body (with the content) became separate chunks, and the embedding for the content chunks did not encode the professor's name. When the query was changed to "Professor Rivka Levitan," the system succeeded because the full name appeared in the header chunk, which was then retrieved.
 
 **What you would change to fix it:** Add professor name as metadata to every chunk, or use a hybrid search (semantic + keyword) that boosts chunks containing the exact name.
+
+---
+
+## Retrieval Test Results
+
+**Query 1: "Which professor teaches CISC 3130?"**
+
+Top 3 retrieved chunks:
+1. `coursicle_levitan.txt`: "Professor Rivka Levitan... CISC 3130 - Data Structures..." — **Relevant.** Directly lists the course number and professor name.
+2. `samanta_rmp.txt`: "Professor: Priyanka Samanta... CISC1050..." — **Less relevant.** Different professor, different course. Retrieved due to general professor/course similarity.
+3. `coursicle_levitan.txt` (chunk 1): "stress free while also being very knowledgable..." — **Partially relevant.** About the same professor but doesn't mention the course number.
+
+**Query 2: "What do students say about Professor Gross?"**
+
+Top 3 retrieved chunks:
+1. `gross_rmp.txt`: "Professor: Murray Gross... worst professor... no Brightspace... yells at students..." — **Highly relevant.** Directly answers the query with specific complaints.
+2. `cuevas_rmp.txt`: "Professor: Carlos Cuevas... funny and kind..." — **Irrelevant.** Different professor entirely. Retrieved due to general professor-review similarity.
+3. `samanta_rmp.txt`: "Professor: Priyanka Samanta..." — **Irrelevant.** Another different professor.
+
+**Query 3: "What is the best restaurant near Brooklyn College?" (Out-of-scope)**
+
+Top 3 retrieved chunks:
+1. `reddit_cs_program_facilities.txt`: "Brooklyn College CS Program Review... roaches... dirty walls..." — **Irrelevant.** Mentions Brooklyn College but no restaurants.
+2. `reddit_cs_program.txt`: "department pushes you with internship opportunities..." — **Irrelevant.** General CS program discussion.
+3. `reddit_cs_program.txt`: "Brooklyn College CS Program Review..." — **Irrelevant.** No restaurant information.
+
+For this out-of-scope query, no relevant chunks exist in the corpus. The system retrieved the closest semantic matches (documents mentioning Brooklyn College), but none contain restaurant information.
 
 ---
 
