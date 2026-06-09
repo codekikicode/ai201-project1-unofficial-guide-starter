@@ -240,7 +240,16 @@ For this out-of-scope query, no relevant chunks exist in the corpus. The system 
 
 ## (Stretch Challenge): Hybrid Search
 
-I combined semantic search with BM25 keyword search to improve retrieval for exact-name queries.
+I compared semantic-only vs. hybrid search on 3 queries:
+
+
+## Hybrid Search Comparison
+
+| Query | Semantic-Only Top Result | Hybrid Search Top Result | Winner |
+|-------|-------------------------|-------------------------|--------|
+| "Which professor teaches CISC 3130?" | `coursicle_levitan.txt` (correct) | `coursicle_levitan.txt` (correct) | Tie — both work |
+| "What do students say about Professor Levitan?" | `zhou_rmp.txt` (wrong — no Levitan info) | `coursicle_levitan.txt` (correct) | **Hybrid** — fixed failure case |
+| "What do students say about Professor Gross?" | `gross_rmp.txt` (correct) | `gross_rmp.txt` (correct) | Tie — both work |
 
 **Problem:** Pure semantic search failed when users asked about "Professor Levitan" without "Rivka" — the embedding model didn't associate the surname with the review content.
 
@@ -249,5 +258,7 @@ I combined semantic search with BM25 keyword search to improve retrieval for exa
 **Impact:** The failure case from the evaluation (Q2) is now resolved. The same query returns the correct document and a detailed, cited answer.
 
 **Code:** `hybrid_search.py`
+
+**Conclusion:** Hybrid search doesn't hurt queries that already work, but it fixes the exact-name matching failure. The BM25 component boosts chunks containing the exact surname, bridging the gap when embeddings miss name-to-content associations.
 
 ---
