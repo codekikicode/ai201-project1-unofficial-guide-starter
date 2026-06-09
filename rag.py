@@ -60,7 +60,7 @@ def main():
     collection = chroma_client.get_collection("professor_reviews")
     
     # Interactive query loop
-    print("Brooklyn College Professor RAG System")
+    print("Brooklyn College CISC Department Review RAG System")
     print("Type 'quit' to exit")
     print("-" * 50)
     

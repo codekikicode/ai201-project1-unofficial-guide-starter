@@ -1,119 +1,99 @@
 # Project 1 Planning: The Unofficial Guide
 
-> Write this document before you write any pipeline code.
-> Your spec and architecture diagram are what you'll use to direct AI tools (Claude, Copilot, etc.) to generate your implementation — the more specific they are, the more useful the generated code will be.
-> Update the Retrieval Approach and Chunking Strategy sections if you change your approach during implementation.
-> Update this file before starting any stretch features.
-
 ---
 
 ## Domain
 
-<!-- What domain did you choose? Why is this knowledge valuable and hard to find through official channels? -->
+The domain I chose was Brooklyn College Computer Science Professor Reviews. This knowledge is valuable because CISC students need to know which professors make the effort to explain programming concepts clearly, grade fairly, and overall create a supportive classroom environment. The information is drawn from informal student reviews on Rate My Professors, Coursicle, and Reddit threads. The Computer Information Science course catalog on the official Brooklyn College site only lists department faculty,  department location, and course descriptions -- not teaching quality or overall student experience.
 
 ---
 
 ## Documents
 
-<!-- List your specific sources: URLs, subreddit names, forum threads, or file descriptions.
-     Aim for at least 10 sources that together cover different subtopics or perspectives within your domain. -->
-
 | # | Source | Description | URL or location |
 |---|--------|-------------|-----------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
-| 6 | | | |
-| 7 | | | |
-| 8 | | | |
-| 9 | | | |
-| 10 | | | |
+| 1 | Rate My Professors |  Professor Amara Auguste (CISC 1115)| https://www.ratemyprofessors.com/professor/2950851 |
+| 2 | Rate My Professors | Professor Carlos Cuevas, review 1 (CISC 3810) | https://www.ratemyprofessors.com/professor/2974235 |
+| 3 | Rate My Professors | Professor Carlos Cuevas, review 2 (CISC 3810) | https://www.ratemyprofessors.com/professor/2974235 |
+| 4 | Rate My Professors | Professor Murray Gross (CISC 3140) | https://www.ratemyprofessors.com/professor/167158 |
+| 5 | Rate My Professors | Professor Priyanka Samanta, review 1 (CISC 1050) | https://www.ratemyprofessors.com/professor/2757901 |
+| 6 | Rate My Professors | Professor Priyanka Samanta, review 2 (CISC 3140) | https://www.ratemyprofessors.com/professor/2757901 |
+| 7 | Rate My Professors | Professor Neng-Fa Zhou (CISC 3160) | https://www.ratemyprofessors.com/professor/176933 |
+| 8 | Coursicle | Professor Rivka Levitan (CISC 3130, CISC 3320) | |
+| 9 | Reddit| r/BrooklynCollege "How is the CS program?" | https://www.reddit.com/r/BrooklynCollege/comments/kgppkf/how_is_the_cs_program/ |
+| 10 |Reddit | r/BrooklynCollege CS program facilities comment | https://www.reddit.com/r/BrooklynCollege/comments/kgppkf/how_is_the_cs_program/ |
 
 ---
 
 ## Chunking Strategy
 
-<!-- How will you split documents into chunks?
-     State your chunk size (in tokens or characters), overlap size, and explain why those
-     numbers fit the structure of your documents.
-     A review-heavy corpus warrants different chunking than a long FAQ. -->
+**Chunk size:** 500 characters
 
-**Chunk size:**
+**Overlap:** 100 characters
 
-**Overlap:**
+**Reasoning:** My documents are mostly short reviews (1-3 paragraphs) and Reddit comments. 500 characters captures most complete reviews in a single chunk, while overlap ensures that if a key fact spans the boundary between two chunks, both chunks retain enough context to be meaningful. For example, a review mentioning both 'Data Structures' and 'explains clearly' won't get split awkwardly. 
 
-**Reasoning:**
+If chunks were too small (200 chars), reviews would get fragmented and lose meaning. If too large (1000+ chars), multiple reviews might merge into one chunk, making retrieval less precise.
 
 ---
 
 ## Retrieval Approach
 
-<!-- Which embedding model are you using (e.g., all-MiniLM-L6-v2 via sentence-transformers)?
-     How many chunks will you retrieve per query (top-k)?
-     If you were deploying this for real users and cost wasn't a constraint, what tradeoffs
-     would you weigh in choosing a different embedding model — context length, multilingual
-     support, accuracy on domain-specific text, latency? -->
+**Embedding model:** all-MiniLM-L6-v2 via sentence-transformers. This model is lightweight (80MB), fast, and works well for semantic similarity on short English text.
 
-**Embedding model:**
+**Top-k:**  I retrieve top-5 chunks per query. Top-5 gives the LLM enough context without overwhelming it with irrelevant chunks -- too few (1-2) and it might miss important perspectives, too many (10+) and the model introduces noise and increases token cost. 
 
-**Top-k:**
-
-**Production tradeoff reflection:**
+**Production tradeoff reflection:** For production, I'd strongly consider: larger models like all-mpnet-base-v2 for better accuracy, OpenAI's text-embedding-3-small for multilingual support, or domain-specific fine-tuned models for more detailed professor review data. 
 
 ---
 
 ## Evaluation Plan
 
-<!-- List your 5 test questions with their expected correct answers.
-     Questions should be specific enough that you can judge whether the system's response
-     is right or wrong. "What are good dining halls?" is too vague.
-     "What do students say about wait times at [dining hall name] during lunch?" is testable. -->
 
 | # | Question | Expected answer |
 |---|----------|-----------------|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
+| 1 | "Which professor teaches CISC 3130 -- Data Structures?" | "Profeessor Rivka Levitan teaches CISC 3130 -- Data Structures" |
+| 2 | "What do students say about Professor Levitan's teaching style?" | "Students say she is knowledgeable, has a nice voice, explains things clearly, and her class is stress-free." |
+| 3 | "What do students say about Professor Zhou's teaching style?" | "Students say Professor Zhou is a nice person but his lectures can be boring. They advise not relying on lectures and studying outside of class. He can be a tough grader on exams but may boost final grades. He is accessible during office hours." |
+| 4 | "What complaints do students have about the Brooklyn College program facilities?" | "Students complain about roaches, dirty walls, broken chalkboards, holes in walls, non-working clocks, and overcrowded classrooms with more students than chairs. There was a protest after a ceiling caved in." |
+| 5 | "What do students say about Professor Gross?" | "Students describe him as the worst professor in 6 years, with no Brightspace, no lectures or grades posted, exams graded his way or no credit, waste-of-time lectures, an ego, and yelling at students. He didn't curve and students got D+ grades despite getting B or above in other CS classes." |
 
 ---
 
 ## Anticipated Challenges
 
-<!-- What could go wrong? Name at least two specific risks with reasoning.
-     Consider: noisy or inconsistent documents, missing source attribution, off-topic
-     retrieval, chunks that split key information across boundaries. -->
+1. Inconsistent review quality and structure: Some reviews are very short (Samanta's "She is good overall, but the labs were a headache") while others are detailed narratives (Gross's multi-sentence complaint). Short reviews provide less semantic signal for embedding, making them harder to retrieve accurately. The chunking strategy must handle both without losing the short ones entirely or fragmenting the long ones awkwardly. 
 
-1.
+2. Missing source attribution and cross-document blending: The LLM might generate an answer that mixes facts from multiple professors without clearly citing which document each came from. For example, saying "Professor Cuevas explains things clearly" when that actually came from Levitan's review. I addressed this by explicitly prompting the model to cite sources and including source metadata in every chunk, but the model still occasionally paraphrases without clear attribution.
 
-2.
+3. Off-topic retrieval for comparative questions: Questions like "Which professor has the highest rating?" require comparing numerical values across multiple documents. Semantic search retrieves chunks that are similar to the query, not chunks that contain the highest value. The system might retrieve a professor with a 3.0 rating instead of a 5.0 rating because the 3.0 review contains more text about "ratings" in general. This is a fundamental limitation of pure semantic retrieval for aggregation queries. 
+
+4. Reddit noise and mixed topics: The Reddit documents contain multiple comments with different topics (facilities, course availability, professor quality). A query about "facilities" might retrieve a chunk that also mentions professors, or vice versa, because the comments are concatenated in the same file. I mitigated this by splitting the two major Reddit comments into separate files, but I know that shorter interweaved commentary can still create noise.
 
 ---
 
 ## Architecture
 
-<!-- Draw a diagram of your pipeline showing the five stages:
-     Document Ingestion → Chunking → Embedding + Vector Store → Retrieval → Generation
-     Label each stage with the tool or library you're using.
-     You can use ASCII art, a Mermaid diagram, or embed a sketch as an image.
-     You'll use this diagram as context when prompting AI tools to implement each stage. -->
-
+┌─────────────────┐     ┌─────────────┐     ┌─────────────────────────┐
+│  10 .txt files  │────▶│  26 chunks │────▶│  all-MiniLM-L6-v2       │
+│  in documents/  │     │  500 chars  │     │  sentence-transformers  │
+│                 │     │  100 overlap│     │                         │
+└─────────────────┘     └─────────────┘     └─────────────────────────┘
+Ingestion                Chunking              Embedding
+(ingest.py)             (chunk.py)            (embed.py)
+┌─────────────────────────┐       ┌─────────────────────────┐
+│      ChromaDB           │────▶ │  Groq LLM               │
+│   vector database       │       │  llama-3.1-8b-instant   │
+│   cosine similarity     │       │  grounded generation    │
+│   top-5 retrieval       │       │  with source citation   │
+└─────────────────────────┘       └─────────────────────────┘
+Retrieval                    Generation
+(embed.py)                   (rag.py)
 ---
 
 ## AI Tool Plan
 
-<!-- For each part of the pipeline below, describe:
-     - Which AI tool you plan to use (Claude, Copilot, ChatGPT, etc.)
-     - What you'll give it as input (which sections of this planning.md, which requirements)
-     - What you expect it to produce
-     - How you'll verify the output matches your spec
-
-     "I'll use AI to help me code" is not a plan.
-     "I'll give Claude my Chunking Strategy section and ask it to implement chunk_text()
-     with my specified chunk size and overlap" is a plan. -->
+I used AI (v. 2.6 Kimi) to help implement the chunking strategy and retrieval pipeline. I provided my chunking strategy section and asked for a Python implementation of the chunk_text() function with sentence-boundary awareness. I also used the chat to debug the Groq API integration when the model was decommissioned, and to structure the Streamlit interface.
 
 **Milestone 3 — Ingestion and chunking:**
 
